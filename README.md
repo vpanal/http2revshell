@@ -1,74 +1,74 @@
 # HTTP2RevShell
 
-**HTTP2RevShell** es una herramienta de Shell remota basada en HTTP para controlar una víctima a través de un servidor Flask y una conexión de socket tcp. Esta aplicación permite enviar comandos a la máquina víctima y recibir respuestas a través de una interfaz web.
+**HTTP2RevShell** is a remote shell tool based on HTTP to control a victim through a Flask server and a TCP socket connection. This application allows you to send commands to the victim's machine and receive responses through a web interface.
 
-## Características
+## Features
 
-- Conexión a la víctima mediante un socket en el puerto especificado.
-- Comunicación en tiempo real mediante comandos que se envían a la víctima y se muestran en el navegador.
-- Interfaz web sencilla para enviar comandos y ver respuestas.
-- API RESTful para interactuar con la víctima a través de solicitudes HTTP.
+- Connect to the victim via a socket on the specified port.
+- Real-time communication through commands sent to the victim and displayed in the browser.
+- Simple web interface to send commands and view responses.
+- RESTful API to interact with the victim through HTTP requests.
 
-## Requisitos
+## Requirements
 
 - Python 3.x
 - Flask
 - Flask-CORS
 
-Puedes instalar las dependencias necesarias utilizando `pip`:
+You can install the necessary dependencies using `pip`:
 
 ```bash
 pip install flask flask-cors
 ```
 
-## Configuración
+## Configuration
 
-Puedes configurar los puertos de la conexión de la víctima y la API Flask con los siguientes parámetros:
+You can configure the victim connection ports and the Flask API with the following parameters:
 
-- `--host`: Dirección IP del servidor (por defecto `0.0.0.0`).
-- `--port`: Puerto para la conexión de datos de la víctima (por defecto `4444`).
-- `--flask_host`: Host para la API Flask (por defecto `0.0.0.0`).
-- `--flask_port`: Puerto para la API Flask (por defecto `8080`).
-- `--timeout`: Tiempo de espera hasta una respuesta del cliente (por defecto `1 segundo`).
+- `--host`: Server IP address (default `0.0.0.0`).
+- `--port`: Port for the victim's data connection (default `4444`).
+- `--flask_host`: Host for the Flask API (default `0.0.0.0`).
+- `--flask_port`: Port for the Flask API (default `8080`).
+- `--timeout`: Timeout for a client response (default `1 second`).
 
-## Ejecución
+## Execution
 
-Para ejecutar la aplicación, usa el siguiente comando:
+To run the application, use the following command:
 
 ```bash
 python app.py --host <IP> --port <PORT> --flask_host <FLASK_HOST> --flask_port <FLASK_PORT> --timeout <TIMEOUT>
 ```
 
-- `<IP>`: Dirección IP del servidor.
-- `<PORT>`: Puerto en el que el servidor escuchará a la víctima.
-- `<FLASK_HOST>`: Host en el que la API Flask estará disponible.
-- `<FLASK_PORT>`: Puerto en el que la API Flask estará disponible.
-- `<TIMEOUT>`: Tiempo de espera hasta una respuesta del cliente.
+- `<IP>`: Server IP address.
+- `<PORT>`: Port where the server will listen to the victim.
+- `<FLASK_HOST>`: Host where the Flask API will be available.
+- `<FLASK_PORT>`: Port where the Flask API will be available.
+- `<TIMEOUT>`: Timeout for a client response.
 
 ## Demo
 
-<p align="left"><img width=100% alt="Demostración de uso" src="https://github.com/vpanal/http2revshell/blob/main/assets/demo.gif"></p>
+<p align="left"><img width=100% alt="Usage demonstration" src="https://github.com/vpanal/http2revshell/blob/main/assets/demo.gif"></p>
 
-## Interfaz Web
+## Web Interface
 
-Accede a la interfaz web visitando `http://<FLASK_HOST>:<FLASK_PORT>/`. Desde allí podrás enviar comandos a la víctima y ver las respuestas en tiempo real.
+Access the web interface by visiting `http://<FLASK_HOST>:<FLASK_PORT>/`. From there you can send commands to the victim and view the responses in real-time.
 
 ## API
 
 ### `POST /api/v1/victim/command`
 
-Envía un comando a la víctima. El cuerpo de la solicitud debe ser un JSON con el comando:
+Send a command to the victim. The request body should be a JSON with the command:
 
 ```json
 {
-  "command": "comando_a_enviar"
+  "command": "command_to_send"
 }
 ```
 
 ### `GET /api/v1/victim/status`
 
-Obtén el estado de la conexión con la víctima (conectado o no).
+Get the status of the connection with the victim (connected or not).
 
-## Licencia
+## License
 
-Este proyecto está bajo la Licencia MIT. Ver el archivo LICENSE para más detalles.
+This project is under the MIT License. See the LICENSE file for more details.
